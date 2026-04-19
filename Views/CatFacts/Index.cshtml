@@ -45,6 +45,10 @@
         <img id="cat-animation" src="/css/cat-chillout.gif" alt="cat" width="150" />
 
     </div>
+
+    <div>
+        <button onclick="DeleteFile()">Usuń wszystkie fakty o kotach !!!</button>
+    </div>
 </div>
 <script>
 let counter = 0;
@@ -108,5 +112,25 @@ function setCatAnimation(src) {
     }
 }
 
-</script>
+function DeleteFile() {
+    fetch("/CatFacts/DeleteFile", { method: "DELETE" })
+        .then(res => {
+            if (res.ok) {
+                alert("Plik z faktami o kotach został usunięty!");
+                document.getElementById("counter-value").textContent = "0 faktów pobranych";
+                document.getElementById("file-size-value").textContent = "0 KB";
+                document.getElementById("time-to-response-value").textContent = "0 ms";
+                document.getElementById("char-count-value").textContent = "0 znaków";
+                const consoleElement = document.getElementById('cat-facts-console');
+                consoleElement.innerHTML = '<div class="log-line">> Plik z faktami o kotach został usunięty!</div><span class="blinking-cursor">_</span>';
+            } else {
+                alert("Nie udało się usunąć pliku z faktami o kotach.");
+            }
+        })
+        .catch(error => console.error("Błąd:", error));
+}
+// podzielenie wszystkiego na warstwy 
+// wyciągnicie logiki do serwisów 
+// ustawienia nazwy pliku i api w app settings 
 
+</script>

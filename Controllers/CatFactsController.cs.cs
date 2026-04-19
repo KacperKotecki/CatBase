@@ -49,4 +49,15 @@ public class CatFactsController : Controller
             charCount = totalCharCount
         });
     }
+
+    [HttpDelete]
+    public async Task<IActionResult> DeleteFile()
+    {
+        var path = Path.Combine(Directory.GetCurrentDirectory(), "output", "catfacts.txt");
+        if(System.IO.File.Exists(path))
+        {
+            System.IO.File.Delete(path);
+        }
+        return Ok();
+    }
 }
