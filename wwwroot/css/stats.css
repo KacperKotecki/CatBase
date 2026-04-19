@@ -1,0 +1,33 @@
+.stats-bar {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    margin: 16px auto;
+}
+
+.stat-card {
+    flex: 1;
+    background-color: #0c0c0c;
+    border: 1px solid #20C20E;
+    border-radius: 6px;
+    padding: 10px 20px;
+    font-family: 'Courier New', Courier, monospace;
+    color: #20C20E;
+    text-shadow: 0 0 6px rgba(32, 194, 14, 0.5);
+    box-shadow: 0 0 10px rgba(32, 194, 14, 0.15);
+    text-align: center;
+}
+
+.stat-label {
+    font-size: 11px;
+    opacity: 0.6;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.stat-value {
+    font-size: 22px;
+    font-weight: bold;
+}

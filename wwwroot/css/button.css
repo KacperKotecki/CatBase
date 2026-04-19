@@ -1,0 +1,31 @@
+/* === Przycisk — terminal style === */
+.btn-cartoon {
+    background: radial-gradient(circle at 35% 35%, #ff6b6b, #cc0000);
+    border: 4px solid #8b0000;
+    border-radius: 50%;
+    width: 100px;
+    height: 100px;
+    cursor: pointer;
+    display: block;
+    margin: 24px auto;
+    box-shadow:
+        0 8px 0 #8b0000,
+        0 10px 20px rgba(0, 0, 0, 0.5),
+        inset 0 -4px 8px rgba(0, 0, 0, 0.3),
+        inset 0 4px 8px rgba(255, 180, 180, 0.4);
+    transition: transform 0.08s, box-shadow 0.08s;
+    outline: none;
+}
+
+.btn-cartoon:hover {
+    background: radial-gradient(circle at 35% 35%, #ff8888, #dd1111);
+}
+
+.btn-cartoon:active {
+    transform: translateY(6px);
+    box-shadow:
+        0 2px 0 #8b0000,
+        0 4px 10px rgba(0, 0, 0, 0.4),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.3),
+        inset 0 4px 8px rgba(255, 180, 180, 0.4);
+}
