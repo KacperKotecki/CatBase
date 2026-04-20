@@ -7,7 +7,7 @@
 
     <div class="stats-bar">
         <div class="stat-card">
-            <span class="stat-label">Pobrane faktyw sesji</span>
+            <span class="stat-label">Pobrane fakty sesji</span>
             <span class="stat-value" id="counter-value">0</span>
         </div>
         <div class="stat-card">
@@ -18,7 +18,7 @@
             <span class="stat-label">Czas odpowiedzi</span>
             <span class="stat-value" id="time-to-response-value">0 ms</span>
         </div>
-            <div class="stat-card">
+        <div class="stat-card">
             <span class="stat-label">Liczba znaków</span>
             <span class="stat-value" id="char-count-value">0</span>
         </div>
@@ -38,7 +38,7 @@
 
     <div class="btn-action-row">
         <button class="btn-cartoon" onclick="GetFact(); ClickTime()"></button>
-        <span id="Click-time">Kliknij, aby pobrać fakt o kotach</span>
+        <span id="click-time">Kliknij, aby pobrać fakt o kotach</span>
     </div>
 
     <div>
@@ -47,90 +47,11 @@
     </div>
 
     <div>
+        @Html.AntiForgeryToken()
         <button onclick="DeleteFile()">Usuń wszystkie fakty o kotach !!!</button>
     </div>
 </div>
-<script>
-let counter = 0;
-let lastClickTime = null;
-let inactivityTimer = null;
 
-function GetFact() {
-    fetch("/CatFacts/GetFact")
-        .then(res => res.json())
-        .then(data => {
-            const consoleElement = document.getElementById('cat-facts-console');
-            const cursorElement = document.querySelector('.blinking-cursor');
-
-            const newLine = document.createElement('div');
-            newLine.className = 'log-line';
-            newLine.textContent = "> " + data.fact;
-
-            consoleElement.insertBefore(newLine, cursorElement);
-
-            const terminalWindow = document.querySelector('.terminal-window');
-            terminalWindow.scrollTop = terminalWindow.scrollHeight;
-
-            counter++;
-            document.getElementById("counter-value").textContent = counter + " faktów pobranych";
-            document.getElementById("file-size-value").textContent = data.fileSizeKb + " KB";
-            document.getElementById("time-to-response-value").textContent = data.timeToResponseMs + " ms";
-            document.getElementById("char-count-value").textContent = data.charCount + " znaków";
-        })
-        .catch(error => console.error("Błąd:", error));
+@section Scripts {
+    <script src="~/js/catfacts.js" asp-append-version="true"></script>
 }
-function ClickTime() {
-    const now = performance.now();
-    let timeBetween = 0;
-    if (lastClickTime !== null) {
-        timeBetween = (now - lastClickTime).toFixed(0);
-        document.getElementById("Click-time").textContent = `Czas od ostatniego kliknięcia: ${timeBetween}ms`;
-    }
-
-        if (lastClickTime === null || timeBetween > 1000) {
-            setCatAnimation("/css/cat-chillout.gif");
-        } else if (timeBetween > 300) {
-            setCatAnimation("/css/cat walking.gif");
-        } else {
-            setCatAnimation("/css/cat-happy.gif");
-        }
-
-    clearTimeout(inactivityTimer);
-    inactivityTimer = setTimeout(() => {
-        document.getElementById("cat-animation").src = "/css/cat-chillout.gif";
-        document.getElementById("Click-time").textContent = "Kliknij, aby pobrać fakt o kotach";
-    }, 1500);
-
-    lastClickTime = now;
-}
-
-function setCatAnimation(src) {
-    const img = document.getElementById("cat-animation");
-    if (!img.src.endsWith(src)) 
-    { 
-        img.src = src;
-    }
-}
-
-function DeleteFile() {
-    fetch("/CatFacts/DeleteFile", { method: "DELETE" })
-        .then(res => {
-            if (res.ok) {
-                alert("Plik z faktami o kotach został usunięty!");
-                document.getElementById("counter-value").textContent = "0 faktów pobranych";
-                document.getElementById("file-size-value").textContent = "0 KB";
-                document.getElementById("time-to-response-value").textContent = "0 ms";
-                document.getElementById("char-count-value").textContent = "0 znaków";
-                const consoleElement = document.getElementById('cat-facts-console');
-                consoleElement.innerHTML = '<div class="log-line">> Plik z faktami o kotach został usunięty!</div><span class="blinking-cursor">_</span>';
-            } else {
-                alert("Nie udało się usunąć pliku z faktami o kotach.");
-            }
-        })
-        .catch(error => console.error("Błąd:", error));
-}
-// podzielenie wszystkiego na warstwy 
-// wyciągnicie logiki do serwisów 
-// ustawienia nazwy pliku i api w app settings 
-
-</script>

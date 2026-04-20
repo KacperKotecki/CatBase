@@ -51,6 +51,7 @@ public class CatFactsController : Controller
     }
 
     [HttpDelete]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteFile()
     {
         var path = Path.Combine(Directory.GetCurrentDirectory(), "output", "catfacts.txt");
