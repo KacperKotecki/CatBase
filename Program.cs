@@ -1,5 +1,8 @@
 
 
+using CatBase.Controllers;
+using CatBase.Models;
+
 var builder = WebApplication.CreateBuilder(args);
 
 
@@ -7,6 +10,11 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddAntiforgery(options => options.HeaderName = "RequestVerificationToken");
+builder.Services.AddHttpClient<CatFactsController>();
+builder.Services.AddOptions<CatFactApiOptions>()
+    .BindConfiguration("CatFactApi")
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
 
 var app = builder.Build();
 

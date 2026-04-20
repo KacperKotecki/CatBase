@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using CatBase.Models;
 using System.Text.Json;
 
@@ -7,6 +8,14 @@ namespace CatBase.Controllers;
 
 public class CatFactsController : Controller
 {
+    private readonly HttpClient _httpClient;
+    private readonly string _factUrl;
+
+    public CatFactsController(HttpClient httpClient, IOptions<CatFactApiOptions> options)
+    {
+        _httpClient = httpClient;
+        _factUrl = options.Value.FactUrl;
+    }
     public IActionResult Index()
     {
         return View();
@@ -14,9 +23,8 @@ public class CatFactsController : Controller
 
     public async Task<IActionResult> GetFact()
     {
-        var httpClient = new HttpClient();
         var stopwatch = Stopwatch.StartNew();
-        var response = await httpClient.GetAsync("https://catfact.ninja/fact");
+        var response = await _httpClient.GetAsync(_factUrl);
         stopwatch.Stop();
         var time = stopwatch.ElapsedMilliseconds;
         var json = await response.Content.ReadAsStringAsync();
