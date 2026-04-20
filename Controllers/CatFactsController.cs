@@ -27,34 +27,35 @@ public class CatFactsController : Controller
         var response = await _httpClient.GetAsync(_factUrl);
         stopwatch.Stop();
         var time = stopwatch.ElapsedMilliseconds;
+
+        if (!response.IsSuccessStatusCode)
+            return StatusCode((int)response.StatusCode, "Zewnętrzne API zwróciło błąd.");
+
         var json = await response.Content.ReadAsStringAsync();
         var fact = JsonSerializer.Deserialize<CatFactResponse>(json);
 
+        if (string.IsNullOrWhiteSpace(fact?.Fact))
+            return BadRequest("Nieprawidłowa odpowiedź API. Sprawdź CatFactApi:FactUrl w appsettings.json.");
 
         var path = Path.Combine(Directory.GetCurrentDirectory(), "output", "catfacts.txt");
-        if(!System.IO.File.Exists(path))
+
+        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+
+        await using (var writer = new StreamWriter(path, append: true))
         {
-            System.IO.Directory.CreateDirectory(Path.GetDirectoryName(path) ?? string.Empty);
-            System.IO.File.Create(path).Dispose();  
+            await writer.WriteLineAsync($"> {DateTime.UtcNow:dd/MM/yyyy HH:mm:ss} {fact.Fact} [Długość: {fact.Length}]");
         }
 
-          await using (var writer = new StreamWriter(path, append: true))
-            {
-                await writer.WriteLineAsync($"> {DateTime.UtcNow} {fact?.Fact} [Długość: {fact?.Length}]");
-            };
-            var fileContent = await System.IO.File.ReadAllTextAsync(path);
-            int totalCharCount = fileContent.Length;
-            
-
-            System.IO.FileInfo fileInfo = new System.IO.FileInfo(path);
+        var fileContent = await System.IO.File.ReadAllTextAsync(path);
+        var fileInfo = new FileInfo(path);
 
         return Json(new
         {
-            fact = fact?.Fact,
-            length = fact?.Length,
+            fact = fact.Fact,
+            length = fact.Length,
             fileSizeKb = Math.Round(fileInfo.Length / 1024.0, 2),
             timeToResponseMs = time,
-            charCount = totalCharCount
+            charCount = fileContent.Length
         });
     }
 
