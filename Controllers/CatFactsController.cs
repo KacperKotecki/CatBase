@@ -10,11 +10,13 @@ public class CatFactsController : Controller
 {
     private readonly HttpClient _httpClient;
     private readonly string _factUrl;
+    private readonly ILogger<CatFactsController> _logger;
 
-    public CatFactsController(HttpClient httpClient, IOptions<CatFactApiOptions> options)
+    public CatFactsController(HttpClient httpClient, IOptions<CatFactApiOptions> options, ILogger<CatFactsController> logger)
     {
         _httpClient = httpClient;
         _factUrl = options.Value.FactUrl;
+        _logger = logger;
     }
     public IActionResult Index()
     {
@@ -29,13 +31,21 @@ public class CatFactsController : Controller
         var time = stopwatch.ElapsedMilliseconds;
 
         if (!response.IsSuccessStatusCode)
-            return StatusCode((int)response.StatusCode, "Zewnętrzne API zwróciło błąd.");
+        {
+            _logger.LogError("API zwróciło błąd {StatusCode} dla {Url}", (int)response.StatusCode, _factUrl);
+            return StatusCode((int)response.StatusCode, "Nie udało się pobrać faktu o kocie.");
+        }
 
         var json = await response.Content.ReadAsStringAsync();
         var fact = JsonSerializer.Deserialize<CatFactResponse>(json);
 
         if (string.IsNullOrWhiteSpace(fact?.Fact))
-            return BadRequest("Nieprawidłowa odpowiedź API. Sprawdź CatFactApi:FactUrl w appsettings.json.");
+        {
+            _logger.LogError("Odpowiedź z {Url} nie zawiera pola 'fact' — prawdopodobnie błędny endpoint", _factUrl);
+            return BadRequest("Nie udało się pobrać faktu o kocie.");
+        }
+
+        _logger.LogInformation("Pobrano fakt ({Length} znaków) w {Time}ms", fact.Fact.Length, time);
 
         var path = Path.Combine(Directory.GetCurrentDirectory(), "output", "catfacts.txt");
 
@@ -64,9 +74,10 @@ public class CatFactsController : Controller
     public async Task<IActionResult> DeleteFile()
     {
         var path = Path.Combine(Directory.GetCurrentDirectory(), "output", "catfacts.txt");
-        if(System.IO.File.Exists(path))
+        if (System.IO.File.Exists(path))
         {
             System.IO.File.Delete(path);
+            _logger.LogWarning("Plik catfacts.txt został usunięty");
         }
         return Ok();
     }
