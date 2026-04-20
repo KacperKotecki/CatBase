@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using CatBase.Models;
 using System.Text.Json;
+using Microsoft.AspNetCore.Hosting;
 
 namespace CatBase.Controllers;
 
@@ -10,19 +11,21 @@ public class CatFactsController : Controller
 {
     private readonly HttpClient _httpClient;
     private readonly string _factUrl;
+    private readonly string _outputFilePath;
     private readonly ILogger<CatFactsController> _logger;
 
-    public CatFactsController(HttpClient httpClient, IOptions<CatFactApiOptions> options, ILogger<CatFactsController> logger)
+    public CatFactsController(HttpClient httpClient, IOptions<CatFactApiOptions> options, ILogger<CatFactsController> logger, IWebHostEnvironment env)
     {
         _httpClient = httpClient;
         _factUrl = options.Value.FactUrl;
+        _outputFilePath = Path.Combine(env.ContentRootPath, options.Value.OutputFileName);
         _logger = logger;
     }
     public IActionResult Index()
     {
         return View();
     }
-
+    [HttpGet]
     public async Task<IActionResult> GetFact()
     {
         var stopwatch = Stopwatch.StartNew();
@@ -47,17 +50,15 @@ public class CatFactsController : Controller
 
         _logger.LogInformation("Pobrano fakt ({Length} znaków) w {Time}ms", fact.Fact.Length, time);
 
-        var path = Path.Combine(Directory.GetCurrentDirectory(), "output", "catfacts.txt");
+        Directory.CreateDirectory(Path.GetDirectoryName(_outputFilePath)!);
 
-        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-
-        await using (var writer = new StreamWriter(path, append: true))
+        await using (var writer = new StreamWriter(_outputFilePath, append: true))
         {
             await writer.WriteLineAsync($"> {DateTime.UtcNow:dd/MM/yyyy HH:mm:ss} {fact.Fact} [Długość: {fact.Length}]");
         }
 
-        var fileContent = await System.IO.File.ReadAllTextAsync(path);
-        var fileInfo = new FileInfo(path);
+        var fileContent = await System.IO.File.ReadAllTextAsync(_outputFilePath);
+        var fileInfo = new FileInfo(_outputFilePath);
 
         return Json(new
         {
@@ -73,10 +74,9 @@ public class CatFactsController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteFile()
     {
-        var path = Path.Combine(Directory.GetCurrentDirectory(), "output", "catfacts.txt");
-        if (System.IO.File.Exists(path))
+        if (System.IO.File.Exists(_outputFilePath))
         {
-            System.IO.File.Delete(path);
+            System.IO.File.Delete(_outputFilePath);
             _logger.LogWarning("Plik catfacts.txt został usunięty");
         }
         return Ok();
