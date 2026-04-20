@@ -9,6 +9,8 @@ The **blue button** destroys all evidence. The file is wiped. No trace remains.
 The terminal shows everything. The cat watches.
 
 ---
+<img width="2940" height="2250" alt="catbase" src="https://github.com/user-attachments/assets/dd8c9d2a-7286-4cc2-b490-5096f18bbd4a" />
+---
 
 ## Run locally
 
