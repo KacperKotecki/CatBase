@@ -1,98 +1,66 @@
-using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.RateLimiting;
-using CatBase.Models;
-using System.Text.Json;
-using Microsoft.AspNetCore.Hosting;
+using CatBase.Services;
 
 namespace CatBase.Controllers;
 
 public class CatFactsController : Controller
 {
-    private readonly HttpClient _httpClient;
-    private readonly string _factUrl;
-    private readonly string _outputFilePath;
-    private readonly ILogger<CatFactsController> _logger;
+    private readonly ICatFactApiService _apiService;
+    private readonly ICatFactFileService _fileService;
 
-    public CatFactsController(HttpClient httpClient, IOptions<CatFactApiOptions> options, ILogger<CatFactsController> logger, IWebHostEnvironment env)
+    public CatFactsController(ICatFactApiService apiService, ICatFactFileService fileService)
     {
-        _httpClient = httpClient;
-        _factUrl = options.Value.FactUrl;
-        _outputFilePath = Path.Combine(env.ContentRootPath, options.Value.OutputFileName);
-        _logger = logger;
+        _apiService = apiService;
+        _fileService = fileService;
     }
+
     public IActionResult Index()
     {
         return View();
     }
+
     [HttpGet]
     [EnableRateLimiting("get-fact")]
     public async Task<IActionResult> GetFact()
     {
-        var stopwatch = Stopwatch.StartNew();
-        HttpResponseMessage response;
-
+        CatFactApiResult fact;
         try
         {
-            response = await _httpClient.GetAsync(_factUrl);
-            stopwatch.Stop();
+            fact = await _apiService.FetchFactAsync();
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode is null)
+        {
+            return StatusCode(503, "Serwis zewnętrzny jest niedostępny. Spróbuj ponownie.");
         }
         catch (HttpRequestException ex)
         {
-            stopwatch.Stop();
-            _logger.LogError(ex, "Nie można połączyć się z API: {Url}", _factUrl);
-            return StatusCode(503, "Serwis zewnętrzny jest niedostępny. Spróbuj ponownie.");
+            return StatusCode((int)ex.StatusCode!, "Nie udało się pobrać faktu o kocie.");
         }
-
-        var time = stopwatch.ElapsedMilliseconds;
-
-        if (!response.IsSuccessStatusCode)
+        catch (InvalidOperationException)
         {
-            _logger.LogError("API zwróciło błąd {StatusCode} dla {Url}", (int)response.StatusCode, _factUrl);
-            return StatusCode((int)response.StatusCode, "Nie udało się pobrać faktu o kocie.");
-        }
-
-        var json = await response.Content.ReadAsStringAsync();
-        var fact = JsonSerializer.Deserialize<CatFactResponse>(json);
-
-        if (string.IsNullOrWhiteSpace(fact?.Fact))
-        {
-            _logger.LogError("Odpowiedź z {Url} nie zawiera pola 'fact' — prawdopodobnie błędny endpoint", _factUrl);
             return BadRequest("Nie udało się pobrać faktu o kocie.");
         }
 
-        _logger.LogInformation("Pobrano fakt ({Length} znaków) w {Time}ms", fact.Fact.Length, time);
-
-        Directory.CreateDirectory(Path.GetDirectoryName(_outputFilePath)!);
-
-        await using (var writer = new StreamWriter(_outputFilePath, append: true))
-        {
-            await writer.WriteLineAsync($"> {DateTime.UtcNow:dd/MM/yyyy HH:mm:ss} {fact.Fact} [Długość: {fact.Length}]");
-        }
-
-        var fileContent = await System.IO.File.ReadAllTextAsync(_outputFilePath);
-        var fileInfo = new FileInfo(_outputFilePath);
+        await _fileService.AppendFactAsync(fact.Fact, fact.Length);
+        var stats = await _fileService.GetStatsAsync();
 
         return Json(new
         {
             fact = fact.Fact,
             length = fact.Length,
-            fileSizeKb = Math.Round(fileInfo.Length / 1024.0, 2),
-            timeToResponseMs = time,
-            charCount = fileContent.Length
+            fileSizeKb = stats.FileSizeKb,
+            timeToResponseMs = fact.TimeToResponseMs,
+            charCount = stats.CharCount
         });
     }
 
     [HttpDelete]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> DeleteFile()
+    public IActionResult DeleteFile()
     {
-        if (System.IO.File.Exists(_outputFilePath))
-        {
-            System.IO.File.Delete(_outputFilePath);
-            _logger.LogWarning("Plik catfacts.txt został usunięty");
-        }
+        _fileService.DeleteFile();
         return Ok();
     }
 }
+

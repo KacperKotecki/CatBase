@@ -1,7 +1,5 @@
-
-
-using CatBase.Controllers;
 using CatBase.Models;
+using CatBase.Services;
 using Microsoft.AspNetCore.RateLimiting;
 using System.Threading.RateLimiting;
 
@@ -12,7 +10,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddAntiforgery(options => options.HeaderName = "RequestVerificationToken");
-builder.Services.AddHttpClient<CatFactsController>();
+builder.Services.AddHttpClient<ICatFactApiService, CatFactApiService>();
+builder.Services.AddSingleton<ICatFactFileService, CatFactFileService>();
 builder.Services.AddOptions<CatFactApiOptions>()
     .BindConfiguration("CatFactApi")
     .ValidateDataAnnotations()
@@ -24,7 +23,7 @@ builder.Services.AddRateLimiter(options =>
     {
         o.PermitLimit = 8;
         o.Window = TimeSpan.FromSeconds(1);
-        o.SegmentsPerWindow = 10;
+        o.SegmentsPerWindow = 8;
         o.QueueLimit = 0;
     });
     options.RejectionStatusCode = 429;
