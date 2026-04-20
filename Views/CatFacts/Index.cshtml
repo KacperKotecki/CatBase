@@ -36,20 +36,25 @@
         </div>
     </div>
 
-    <div class="btn-action-row">
-        <button class="btn-cartoon" onclick="GetFact(); ClickTime()"></button>
-        <span id="click-time">Kliknij, aby pobrać fakt o kotach</span>
+    <div class="action-container">
+
+        <div class="click-time-display">
+            <span class="click-time-label">&gt; last_click</span>
+            <span id="click-time" class="click-time-value">awaiting input...</span>
+        </div>
+
+        <div class="cat-animation-container">
+            <img id="cat-animation" src="/css/cat-chillout.gif" alt="cat" width="150" />
+        </div>
+
+        <div class="btn-row">
+            @Html.AntiForgeryToken()
+            <button class="btn-cartoon btn-cartoon--red" onclick="GetFact(); ClickTime()"></button>
+            <button class="btn-cartoon btn-cartoon--blue" onclick="DeleteFile()"></button>
+        </div>
+
     </div>
 
-    <div>
-        <img id="cat-animation" src="/css/cat-chillout.gif" alt="cat" width="150" />
-
-    </div>
-
-    <div>
-        @Html.AntiForgeryToken()
-        <button onclick="DeleteFile()">Usuń wszystkie fakty o kotach !!!</button>
-    </div>
 </div>
 
 @section Scripts {

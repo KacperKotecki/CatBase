@@ -59,7 +59,7 @@ function ClickTime() {
     let timeBetween = 0;
     if (lastClickTime !== null) {
         timeBetween = (now - lastClickTime).toFixed(0);
-        clickTimeElement.textContent = `Czas od ostatniego kliknięcia: ${timeBetween}ms`;
+        clickTimeElement.textContent = `${timeBetween}ms`;
     }
 
     if (lastClickTime === null || timeBetween > 1000) {
@@ -73,7 +73,7 @@ function ClickTime() {
     clearTimeout(inactivityTimer);
     inactivityTimer = setTimeout(() => {
         catAnimationElement.src = "/css/cat-chillout.gif";
-        clickTimeElement.textContent = "Kliknij, aby pobrać fakt o kotach";
+        clickTimeElement.textContent = "awaiting input...";
     }, 1500);
 
     lastClickTime = now;

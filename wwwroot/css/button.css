@@ -1,31 +1,106 @@
-/* === Przycisk — terminal style === */
+/* === Przyciski === */
 .btn-cartoon {
-    background: radial-gradient(circle at 35% 35%, #ff6b6b, #cc0000);
-    border: 4px solid #8b0000;
     border-radius: 50%;
     width: 100px;
     height: 100px;
     cursor: pointer;
     display: block;
-    margin: 24px auto;
+    outline: none;
+    transition: transform 0.08s, box-shadow 0.08s;
+}
+
+.btn-cartoon:active {
+    transform: translateY(6px);
+}
+
+/* Czerwony — pobierz fakt */
+.btn-cartoon--red {
+    background: radial-gradient(circle at 35% 35%, #ff6b6b, #cc0000);
+    border: 4px solid #8b0000;
     box-shadow:
         0 8px 0 #8b0000,
         0 10px 20px rgba(0, 0, 0, 0.5),
         inset 0 -4px 8px rgba(0, 0, 0, 0.3),
         inset 0 4px 8px rgba(255, 180, 180, 0.4);
-    transition: transform 0.08s, box-shadow 0.08s;
-    outline: none;
 }
 
-.btn-cartoon:hover {
+.btn-cartoon--red:hover {
     background: radial-gradient(circle at 35% 35%, #ff8888, #dd1111);
 }
 
-.btn-cartoon:active {
-    transform: translateY(6px);
+.btn-cartoon--red:active {
     box-shadow:
         0 2px 0 #8b0000,
         0 4px 10px rgba(0, 0, 0, 0.4),
         inset 0 -2px 4px rgba(0, 0, 0, 0.3),
         inset 0 4px 8px rgba(255, 180, 180, 0.4);
+}
+
+/* Niebieski — usuń plik */
+.btn-cartoon--blue {
+    background: radial-gradient(circle at 35% 35%, #6b9fff, #0044cc);
+    border: 4px solid #002f8b;
+    box-shadow:
+        0 8px 0 #002f8b,
+        0 10px 20px rgba(0, 0, 0, 0.5),
+        inset 0 -4px 8px rgba(0, 0, 0, 0.3),
+        inset 0 4px 8px rgba(180, 210, 255, 0.4);
+}
+
+.btn-cartoon--blue:hover {
+    background: radial-gradient(circle at 35% 35%, #88b3ff, #1155dd);
+}
+
+.btn-cartoon--blue:active {
+    box-shadow:
+        0 2px 0 #002f8b,
+        0 4px 10px rgba(0, 0, 0, 0.4),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.3),
+        inset 0 4px 8px rgba(180, 210, 255, 0.4);
+}
+
+/* === Layout sekcji akcji === */
+.action-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    margin-top: 24px;
+}
+
+.btn-row {
+    display: flex;
+    flex-direction: row;
+    gap: 32px;
+    align-items: center;
+}
+
+.btn-row .btn-cartoon {
+    margin: 0;
+}
+
+/* === Wyświetlacz czasu kliknięcia === */
+.click-time-display {
+    font-family: 'Courier New', Courier, monospace;
+    background: #0d0d0d;
+    border: 1px solid #20C20E;
+    border-radius: 6px;
+    padding: 8px 20px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    box-shadow: 0 0 8px rgba(32, 194, 14, 0.2);
+}
+
+.click-time-label {
+    color: #20C20E;
+    font-size: 0.75rem;
+    opacity: 0.7;
+    white-space: nowrap;
+}
+
+.click-time-value {
+    color: #20C20E;
+    font-size: 0.9rem;
+    text-shadow: 0 0 6px rgba(32, 194, 14, 0.5);
 }

@@ -19,6 +19,8 @@ html {
 
 body {
   margin-bottom: 60px;
+  padding-top: 140px;
+  background-color: #0b0f2e;
 }
 
 .form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
