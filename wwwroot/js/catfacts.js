@@ -94,6 +94,8 @@ function setCatAnimation(src) {
 }
 
 function DeleteFile() {
+    counter = 0;
+
     const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
     fetch("/CatFacts/DeleteFile", {
         method: "DELETE",
