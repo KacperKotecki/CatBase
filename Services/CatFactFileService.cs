@@ -34,13 +34,22 @@ public class CatFactFileService : ICatFactFileService
     {
         var fileInfo = new FileInfo(_outputFilePath);
         if (!fileInfo.Exists)
-            return new CatFactFileStats(0, 0);
+            return new CatFactFileStats(0, 0, 0);
 
-        var content = await File.ReadAllTextAsync(_outputFilePath);
-        return new CatFactFileStats(
-            Math.Round(fileInfo.Length / 1024.0, 2),
-            content.Length
-        );
+        try
+        {
+            var content = await File.ReadAllTextAsync(_outputFilePath);
+            var lineCount = content.Split('\n', StringSplitOptions.RemoveEmptyEntries).Length;
+            return new CatFactFileStats(
+                Math.Round(fileInfo.Length / 1024.0, 2),
+                content.Length,
+                lineCount
+            );
+        }
+        catch (FileNotFoundException)
+        {
+            return new CatFactFileStats(0, 0, 0);
+        }
     }
 
     public void DeleteFile()

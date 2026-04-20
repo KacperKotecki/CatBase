@@ -45,6 +45,10 @@
     color: #ff4444;
 }
 
+.log-line--warning {
+    color: #f0c040;
+}
+
 .blinking-cursor {
     font-weight: bold;
     font-size: 18px;

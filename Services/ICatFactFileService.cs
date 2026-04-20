@@ -9,5 +9,6 @@ public interface ICatFactFileService
 
 public record CatFactFileStats(
     double FileSizeKb,
-    int CharCount
+    int CharCount,
+    int LineCount
 );

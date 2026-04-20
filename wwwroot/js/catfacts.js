@@ -1,5 +1,6 @@
 let counter = 0;
 let lastClickTime = null;
+
 let inactivityTimer = null;
 
 const counterValueElement = document.getElementById("counter-value");
@@ -21,6 +22,17 @@ document.getElementById('btn-get-fact').addEventListener('click', () => {
 
 document.getElementById('btn-delete-file').addEventListener('click', DeleteFile);
 
+
+fetch("/CatFacts/GetStats")
+    .then(res => res.ok ? res.json() : null)
+    .then(data => {
+        if (!data) return;
+        counter = data.lineCount;
+        counterValueElement.textContent = counter + " faktów pobranych";
+        fileSizeValueElement.textContent = data.fileSizeKb + " KB";
+        charCountValueElement.textContent = data.charCount + " znaków";
+    })
+    .catch(() => {});
 
 function GetFact() {
     fetch("/CatFacts/GetFact")
@@ -44,13 +56,13 @@ function GetFact() {
 
             TerminalMessage("> " + data.fact);
 
-            counter++;
+            counter = data.lineCount;
             counterValueElement.textContent = counter + " faktów pobranych";
             fileSizeValueElement.textContent = data.fileSizeKb + " KB";
             timeToResponseValueElement.textContent = data.timeToResponseMs + " ms";
             charCountValueElement.textContent = data.charCount + " znaków";
         })
-        .catch(error => console.error("Błąd:", error));
+        .catch(() => TerminalMessage('> ⚠ Błąd połączenia z serwerem.', 'log-line log-line--error'));
 }
 
 function TerminalMessage(message, style = 'log-line') {
@@ -104,15 +116,15 @@ function DeleteFile() {
         .then(res => {
             if (res.ok) {
                 consoleElement.querySelectorAll('.log-line').forEach(el => el.remove());
-                TerminalMessage('> Plik z faktami o kotach został usunięty.', 'log-line log-line--error');
+                TerminalMessage('> Plik z faktami o kotach został usunięty.', 'log-line log-line--warning');
 
                 counterValueElement.textContent = "0 faktów pobranych";
                 fileSizeValueElement.textContent = "0 KB";
                 timeToResponseValueElement.textContent = "0 ms";
                 charCountValueElement.textContent = "0 znaków";
             } else {
-                TerminalMessage('> Nie udało się usunąć pliku z faktami o kotach.', 'log-line log-line--error');
+                TerminalMessage('> Nie udało się usunąć pliku.', 'log-line log-line--error');
             }
         })
-        .catch(error => console.error("Błąd:", error));
+        .catch(() => TerminalMessage('> ⚠ Błąd połączenia z serwerem.', 'log-line log-line--error'));
 }

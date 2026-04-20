@@ -51,7 +51,20 @@ public class CatFactsController : Controller
             length = fact.Length,
             fileSizeKb = stats.FileSizeKb,
             timeToResponseMs = fact.TimeToResponseMs,
-            charCount = stats.CharCount
+            charCount = stats.CharCount,
+            lineCount = stats.LineCount
+        });
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetStats()
+    {
+        var stats = await _fileService.GetStatsAsync();
+        return Json(new
+        {
+            fileSizeKb = stats.FileSizeKb,
+            charCount = stats.CharCount,
+            lineCount = stats.LineCount
         });
     }
 
