@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.RateLimiting;
 using CatBase.Models;
 using System.Text.Json;
 using Microsoft.AspNetCore.Hosting;
@@ -26,11 +27,24 @@ public class CatFactsController : Controller
         return View();
     }
     [HttpGet]
+    [EnableRateLimiting("get-fact")]
     public async Task<IActionResult> GetFact()
     {
         var stopwatch = Stopwatch.StartNew();
-        var response = await _httpClient.GetAsync(_factUrl);
-        stopwatch.Stop();
+        HttpResponseMessage response;
+
+        try
+        {
+            response = await _httpClient.GetAsync(_factUrl);
+            stopwatch.Stop();
+        }
+        catch (HttpRequestException ex)
+        {
+            stopwatch.Stop();
+            _logger.LogError(ex, "Nie można połączyć się z API: {Url}", _factUrl);
+            return StatusCode(503, "Serwis zewnętrzny jest niedostępny. Spróbuj ponownie.");
+        }
+
         var time = stopwatch.ElapsedMilliseconds;
 
         if (!response.IsSuccessStatusCode)

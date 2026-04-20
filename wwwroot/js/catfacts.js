@@ -17,16 +17,25 @@ const terminalWindow = document.querySelector('.terminal-window');
 
 function GetFact() {
     fetch("/CatFacts/GetFact")
-        .then(res => res.json())
+        .then(res => {
+            if (res.status === 429) {
+                TerminalMessage('> ⚠ Nie tak szybko! Zwolnij trochę...', 'log-line log-line--error');
+                return null;
+            }
+            if (res.status === 503) {
+                TerminalMessage('> ⚠ Serwis zewnętrzny niedostępny. Spróbuj za chwilę.', 'log-line log-line--error');
+                return null;
+            }
+            if (!res.ok) {
+                TerminalMessage('> Błąd serwera. Spróbuj ponownie.', 'log-line log-line--error');
+                return null;
+            }
+            return res.json();
+        })
         .then(data => {
-            
-            const newLine = document.createElement('div');
-            newLine.className = 'log-line';
-            newLine.textContent = "> " + data.fact;
+            if (!data) return;
 
-            consoleElement.insertBefore(newLine, cursorElement);
-
-            terminalWindow.scrollTop = terminalWindow.scrollHeight;
+            TerminalMessage("> " + data.fact);
 
             counter++;
             counterValueElement.textContent = counter + " faktów pobranych";
@@ -35,6 +44,14 @@ function GetFact() {
             charCountValueElement.textContent = data.charCount + " znaków";
         })
         .catch(error => console.error("Błąd:", error));
+}
+
+function TerminalMessage(message, style = 'log-line') {
+    const msg = document.createElement('div');
+    msg.className = style;
+    msg.textContent = message;
+    consoleElement.insertBefore(msg, cursorElement);
+    terminalWindow.scrollTop = terminalWindow.scrollHeight;
 }
 
 function ClickTime() {
@@ -77,21 +94,15 @@ function DeleteFile() {
     })
         .then(res => {
             if (res.ok) {
-                alert("Plik z faktami o kotach został usunięty!");
-                
                 consoleElement.querySelectorAll('.log-line').forEach(el => el.remove());
-                
-                const msg = document.createElement('div');
-                msg.className = 'log-line';
-                msg.textContent = '> Plik z faktami o kotach został usunięty!';
-                consoleElement.insertBefore(msg, cursorElement); 
+                TerminalMessage('> Plik z faktami o kotach został usunięty.', 'log-line log-line--error');
 
                 counterValueElement.textContent = "0 faktów pobranych";
                 fileSizeValueElement.textContent = "0 KB";
                 timeToResponseValueElement.textContent = "0 ms";
                 charCountValueElement.textContent = "0 znaków";
             } else {
-                alert("Nie udało się usunąć pliku z faktami o kotach.");
+                TerminalMessage('> Nie udało się usunąć pliku z faktami o kotach.', 'log-line log-line--error');
             }
         })
         .catch(error => console.error("Błąd:", error));

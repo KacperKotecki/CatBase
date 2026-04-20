@@ -39,6 +39,11 @@
 .log-line {
     margin-bottom: 8px;
     word-wrap: break-word; 
+}
+
+.log-line--error {
+    color: #ff4444;
+}
 
 .blinking-cursor {
     font-weight: bold;
