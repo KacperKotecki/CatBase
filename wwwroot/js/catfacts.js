@@ -14,6 +14,13 @@ const clickTimeElement = document.getElementById("click-time");
 
 const terminalWindow = document.querySelector('.terminal-window');
 
+document.getElementById('btn-get-fact').addEventListener('click', () => {
+    GetFact();
+    ClickTime();
+});
+
+document.getElementById('btn-delete-file').addEventListener('click', DeleteFile);
+
 
 function GetFact() {
     fetch("/CatFacts/GetFact")
